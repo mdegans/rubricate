@@ -7,7 +7,8 @@
   `Keyword`, numbers `Number`, `//` and `/* */` comments `Comment`. A string
   ends at its closing quote or at the end of its line, so one missing quote
   does not colour the rest of a block.
-- CI measures test coverage and fails under 95% of lines.
+- CI measures test coverage, fails under 95% of lines, and uploads the
+  report to Codecov.
 
 ## 0.1.0
 

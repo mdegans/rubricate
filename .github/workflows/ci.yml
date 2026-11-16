@@ -47,8 +47,21 @@ jobs:
 
       - uses: taiki-e/install-action@cargo-llvm-cov
 
+      # The gate is here, not at Codecov: the job fails under 95% of lines
+      # whether or not the upload works.
       - name: coverage (fails under 95% of lines)
-        run: cargo llvm-cov --summary-only --fail-under-lines 95
+        run: cargo llvm-cov --lcov --output-path lcov.info --fail-under-lines 95
+
+      - name: summary
+        run: cargo llvm-cov report --summary-only
+
+      # For the badge and the per-line view. Secret: CODECOV_TOKEN.
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: lcov.info
+          fail_ci_if_error: true
 
   # The crate says it is `no_std` and runs in a browser: build it for a
   # target with no standard library and for wasm, so neither claim can rot.
