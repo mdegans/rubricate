@@ -9,14 +9,23 @@
 //! ```
 //! use rubricate::{Kind, Language, tokens};
 //!
-//! let source = "plain text, for now";
-//! let mut out = String::new();
-//! for token in tokens(Language::Text, source) {
-//!     // Map `token.kind` to a class of your own; never trust the input for one
-//!     assert_eq!(token.kind, Kind::Plain);
-//!     out.push_str(token.text);
-//! }
-//! assert_eq!(out, source);
+//! let source = r#"{"answer": 42}"#;
+//! let kinds: Vec<(Kind, &str)> =
+//!     tokens(Language::Json, source).map(|token| (token.kind, token.text)).collect();
+//! assert_eq!(
+//!     kinds,
+//!     [
+//!         (Kind::Plain, "{"),
+//!         (Kind::Attribute, r#""answer""#),
+//!         (Kind::Plain, ": "),
+//!         (Kind::Number, "42"),
+//!         (Kind::Plain, "}"),
+//!     ]
+//! );
+//! // Map each kind to a class of your own; never take one from the input.
+//! // Joined in order, the texts are the source.
+//! let joined: String = kinds.iter().map(|(_, text)| *text).collect();
+//! assert_eq!(joined, source);
 //! ```
 //!
 //! # What it promises
@@ -43,16 +52,17 @@
 //!
 //! # Languages
 //!
-//! This release has one, [`Language::Text`], which is all [`Kind::Plain`]:
-//! the crate's promises are in place and tested before any rules are.
-//! [`Language::from_name`] is how a caller with a code fence's info string
-//! asks for one; a name it does not know is `None`, and the caller draws
-//! the block plain.
+//! [`Language::Json`] (JSON, JSON Lines, JSON with comments) and
+//! [`Language::Text`], which is all [`Kind::Plain`]. More come one at a
+//! time. [`Language::from_name`] is how a caller with a code fence's info
+//! string asks for one; a name it does not know is `None`, and the caller
+//! draws the block plain.
 #![no_std]
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
 mod cursor;
+mod json;
 
 use cursor::Cursor;
 
@@ -139,11 +149,13 @@ impl Kind {
 pub enum Language {
     /// Plain text: one [`Kind::Plain`] token
     Text,
+    /// JSON, JSON Lines, and JSON with comments: keys told from values
+    Json,
 }
 
 impl Language {
     /// Every language, in declaration order
-    pub const ALL: [Language; 1] = [Language::Text];
+    pub const ALL: [Language; 2] = [Language::Text, Language::Json];
 
     /// The language a code fence's info string names (`"text"`, `"TXT"`),
     /// ASCII case ignored. `None` for a name this crate has no rules for:
@@ -167,6 +179,7 @@ impl Language {
     pub const fn names(self) -> &'static [&'static str] {
         match self {
             Language::Text => &["text", "txt", "plain", "plaintext"],
+            Language::Json => &["json", "jsonc", "json5", "jsonl", "ndjson"],
         }
     }
 }
@@ -256,6 +269,7 @@ fn scan(language: Language, cursor: &mut Cursor<'_>) -> Kind {
             cursor.finish();
             Kind::Plain
         }
+        Language::Json => json::scan(cursor),
     }
 }
 

@@ -11,8 +11,8 @@ number, …), and leaves the drawing to you.
 ```rust
 use rubricate::{Language, tokens};
 
-let source = "plain text, for now";
-if let Some(language) = Language::from_name("text") {
+let source = r#"{"answer": 42}"#;
+if let Some(language) = Language::from_name("json") {
     for token in tokens(language, source) {
         // token.kind: map it to a class of your own
         // token.text: a slice of `source`
@@ -43,9 +43,13 @@ people paste, this is for that.
 
 ## Languages
 
-`0.1.0` has one, `text`, which is all plain: the promises above are in place
-and tested before any rules are. Planned, most-pasted first: JSON, Python,
-Rust, SQL, diff, shell, TOML and YAML, CSV, XML and HTML, Markdown.
+| Language | Names | What is told apart |
+|---|---|---|
+| JSON | `json`, `jsonc`, `json5`, `jsonl`, `ndjson` | keys, strings, numbers, `true`/`false`/`null`, comments |
+| Plain text | `text`, `txt`, `plain`, `plaintext` | nothing: one plain token |
+
+Planned, most-pasted first: Python, Rust, SQL, diff, shell, TOML and YAML,
+CSV, XML and HTML, Markdown.
 
 ## Using the kinds
 
