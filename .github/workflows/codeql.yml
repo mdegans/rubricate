@@ -1,0 +1,39 @@
+# Code scanning. Branch protection requires CodeQL results with nothing at
+# High or above, so this must run on every pull request and on `main`.
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly, so new queries are run against code that has not changed
+    - cron: "17 4 * * 1"
+
+permissions: {}
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      # Uploading the results
+      security-events: write
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        # The crate, and these workflows themselves
+        language: [rust, actions]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+
+      - uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:${{ matrix.language }}

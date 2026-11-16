@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: fmt
+        run: cargo fmt --check
+
+      - name: clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: test
+        run: cargo test
+
+      - name: docs
+        run: cargo doc --no-deps
+        env:
+          RUSTDOCFLAGS: -D warnings
+
+  # The crate says it is `no_std` and runs in a browser: build it for a
+  # target with no standard library and for wasm, so neither claim can rot.
+  targets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown, thumbv7em-none-eabihf
+
+      - name: wasm32
+        run: cargo build --target wasm32-unknown-unknown
+
+      - name: no_std (bare metal)
+        run: cargo build --target thumbv7em-none-eabihf
+
+  # The oldest compiler the manifest claims to support.
+  msrv:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@1.85
+
+      - name: build and test on the MSRV
+        run: cargo test
+
+  # The manifest says there are none; hold it to that.
+  no-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: the dependency tree is this crate alone
+        run: |
+          tree=$(cargo tree --edges normal,build --prefix none | sort -u)
+          echo "$tree"
+          [ "$(echo "$tree" | wc -l)" -eq 1 ] || { echo "::error::rubricate must have no dependencies"; exit 1; }
+
+  # Prove the crate is publishable before it merges.
+  publish-dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: cargo publish --dry-run
+        run: cargo publish --dry-run

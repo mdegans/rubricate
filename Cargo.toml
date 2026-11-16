@@ -1,0 +1,18 @@
+[package]
+name = "rubricate"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT"
+description = "A small, dependency-free tokeniser for highlighting code blocks by rule. Linear time, no unsafe."
+repository = "https://github.com/mdegans/rubricate"
+readme = "README.md"
+keywords = ["syntax-highlighting", "tokenizer", "highlight", "no-std", "wasm"]
+categories = ["text-processing", "no-std", "wasm"]
+exclude = [".github/", "justfile"]
+
+[dependencies]
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
