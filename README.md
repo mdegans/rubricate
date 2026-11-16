@@ -1,5 +1,11 @@
 # rubricate
 
+[![CI](https://github.com/mdegans/rubricate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/mdegans/rubricate/actions/workflows/ci.yml?query=branch%3Amain)
+[![codecov](https://codecov.io/gh/mdegans/rubricate/graph/badge.svg)](https://codecov.io/gh/mdegans/rubricate)
+[![crates.io](https://img.shields.io/crates/v/rubricate.svg)](https://crates.io/crates/rubricate)
+[![docs.rs](https://docs.rs/rubricate/badge.svg)](https://docs.rs/rubricate)
+[![license](https://img.shields.io/crates/l/rubricate.svg)](https://github.com/mdegans/rubricate/blob/main/LICENSE)
+
 Syntax highlighting by rule, not by parsing.
 
 To rubricate a manuscript was to mark its headings and key words in red so a
