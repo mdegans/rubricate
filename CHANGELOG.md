@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0
+
+- `Language::Json` (`json`, `jsonc`, `json5`, `jsonl`, `ndjson`): an object's
+  keys are `Attribute`, other strings `String`, `true`/`false`/`null`
+  `Keyword`, numbers `Number`, `//` and `/* */` comments `Comment`. A string
+  ends at its closing quote or at the end of its line, so one missing quote
+  does not colour the rest of a block.
+- CI measures test coverage and fails under 95% of lines.
+
 ## 0.1.0
 
 The scaffold: the API and its promises, before any rules.
